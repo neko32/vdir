@@ -1,15 +1,15 @@
-
+#![warn(clippy::all, clippy::pedantic)]
 
 pub mod vdir {
 
+    #[must_use]
     pub fn walk(root:&str) -> String {
-        let buf:String = String::new();
-        let mut bufbox:Box<String> = Box::new(buf);
-        do_walk(&mut bufbox, root.to_string(), 0);
-        *bufbox
+        let mut buf:String = String::new();
+        do_walk(&mut buf, root.to_string(), 0);
+        buf
     }
 
-    fn do_walk(buf_on_heap:&mut Box<String>, fpath:String, depth:u16) -> () {
+    fn do_walk(buf_on_heap:&mut String, fpath:String, depth:u16) {
         let entries = std::fs::read_dir(fpath).unwrap();
         let mut dirs:Vec<PathAndName> = Vec::new();
         let mut files :Vec<PathAndName> = Vec::new();
@@ -26,13 +26,13 @@ pub mod vdir {
         dirs.sort_by(|a,b|{a.path.cmp(&b.path)});
         files.sort_by(|a,b|{a.path.cmp(&b.path)});
         for ent in dirs {
-            let space:String = std::iter::repeat("-").take(depth as usize).collect();
+            let space:String = "-".repeat(depth as usize);
             buf_on_heap.push_str(format!("{} {} [D]\n", space, ent.path).as_str());
             // buf_on_heap.push_str(format!("{}|\n", space).as_str());
             do_walk(buf_on_heap, ent.path, depth + 2);
         } 
         for ent in files {
-            let space:String = std::iter::repeat("-").take(depth as usize).collect();
+            let space:String = "-".repeat(depth as usize);
             buf_on_heap.push_str(format!("{} {} [F]\n", space, ent.name).as_str());
         }
     }
